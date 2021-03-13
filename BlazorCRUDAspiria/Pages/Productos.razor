@@ -1,0 +1,65 @@
+﻿@page "/productos"
+
+@using System.Net.Http
+@using System.Net.Http.Json;
+@using BlazorCRUDAspiria.Data;
+
+<!-- objeto para inyección Http -->
+@inject HttpClient Http
+
+<h3>Productos</h3>
+
+<div class="row">
+    <div class="col-12 text-right">
+        <a href="productoform">Nuevo</a>
+    </div>
+</div>
+
+<table class="table">
+
+    <tr>
+        <td>Id</td>
+        <td>Nombre</td>
+        <td>Descripcion</td>
+        <td>Edad</td>
+        <td>Compañia</td>
+        <td>Precio</td>
+        <th></th>
+    </tr>
+    @if (oRespuesta != null && oRespuesta.Data != null)
+    {
+        @foreach (var oElement in oRespuesta.Data)
+        {
+            <tr>
+                <td>@oElement.Id</td>
+                <td>@oElement.Nombre</td>
+                <td>@oElement.Descripcion</td>
+                <td>@oElement.Edad</td>
+                <td>@oElement.Compañia</td>
+                <td>@oElement.Precio</td>
+                <td>
+                    <a href="/productoform/@oElement.Id">Editar</a>
+                    <a href="/eliminarproducto/@oElement.Id">Eliminar</a>
+
+                </td>
+            </tr>
+        }
+    }
+
+</table>
+
+
+
+
+@code {
+
+    public string Url = "/api/Producto";
+    public Data.Respuesta<List<Producto>> oRespuesta = new Data.Respuesta<List<Producto>>();
+
+    //Para sobrescribir una tarea asincrona
+    protected override async Task OnInitializedAsync() =>
+    oRespuesta = await Http.GetFromJsonAsync<Respuesta<List<Producto>>>(Url);
+    //Iyeccion de dependencia de objeto http
+
+
+}

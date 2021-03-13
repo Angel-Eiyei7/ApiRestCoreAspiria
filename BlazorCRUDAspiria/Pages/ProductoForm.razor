@@ -1,0 +1,86 @@
+﻿@page "/productoform"
+@page "/productoform/{Id:int}"
+
+@using Data;
+@using System.Net.Http
+@using System.Net.Http.Json;
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+<h3>ProductoForm</h3>
+
+<EditForm Model="@oProducto">
+    <div class="container-fluid">
+        <div class="form-group row mb-1">
+            <label class="col-sm-3">Nombre</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" @bind-Value="@oProducto.Nombre"></InputText>
+            </div>
+        </div>
+        <div class="form-group row mb-1">
+            <label class="col-sm-3">Descripcion</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" @bind-Value="@oProducto.Descripcion"></InputText>
+            </div>
+        </div>
+        <div class="form-group row mb-1">
+            <label class="col-sm-3">Edad</label>
+            <div class="col-sm-9">
+                <InputNumber class="form-control" @bind-Value="@oProducto.Edad"></InputNumber>
+            </div>
+        </div>
+        <div class="form-group row mb-1">
+            <label class="col-sm-3">Compañia</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" @bind-Value="@oProducto.Compañia"></InputText>
+            </div>
+        </div>
+        <div class="form-group row mb-1">
+            <label class="col-sm-3">Precio</label>
+            <div class="col-sm-9">
+                <InputNumber step="0.00" class="form-control" @bind-Value="@oProducto.Precio"></InputNumber>
+            </div>
+        </div>
+        <div class="form-group row mb-1">
+            <div class="col-sm-12">
+                <button class="btn btn-primary" @onclick="Save">Guardar</button>
+                <button class="btn btn-primary" @onclick="Cancelar">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    Producto oProducto = new Producto();
+    Respuesta<object> oRespuesta = new Respuesta<object>();
+    Respuesta<Producto> oRespuestaProducto = new Respuesta<Producto>();
+    public string Url = "/api/Producto";
+
+    private void Cancelar() => NavigationManager.NavigateTo("/productos");
+
+    private async Task Save()
+    {
+        if (Id != 0)
+        {
+            var response = await Http.PutAsJsonAsync<Producto>(Url, oProducto);
+            oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<object>>().Result;
+        }
+        else
+        {
+            var response = await Http.PostAsJsonAsync<Producto>(Url, oProducto);
+            oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<object>>().Result;
+        }
+        NavigationManager.NavigateTo("/productos");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            oRespuestaProducto = await Http.GetFromJsonAsync<Respuesta<Producto>>(Url + "/" + Id);
+            oProducto = oRespuestaProducto.Data;
+        }
+    }
+
+}
